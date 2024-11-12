@@ -1,0 +1,185 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import os
+import random
+import string
+
+# Fungsi untuk enkripsi dan dekripsi Vigenere Cipher
+def vigenere_encrypt(plain_text, key):
+    cipher_text = ""
+    key = key.upper()
+    key_index = 0
+    for char in plain_text:
+        if char.isalpha():
+            shift = ord(key[key_index]) - ord('A')
+            cipher_char = chr((ord(char.upper()) - ord('A') + shift) % 26 + ord('A'))
+            cipher_text += cipher_char
+            key_index = (key_index + 1) % len(key)
+    return cipher_text
+
+def vigenere_decrypt(cipher_text, key):
+    plain_text = ""
+    key = key.upper()
+    key_index = 0
+    for char in cipher_text:
+        if char.isalpha():
+            shift = ord(key[key_index]) - ord('A')
+            plain_char = chr((ord(char) - ord('A') - shift + 26) % 26 + ord('A'))
+            plain_text += plain_char
+            key_index = (key_index + 1) % len(key)
+    return plain_text
+
+# Fungsi untuk enkripsi dan dekripsi Extended Vigenere Cipher
+def extended_vigenere_encrypt(plain_bytes, key):
+    cipher_bytes = bytearray()
+    key_bytes = key.encode()
+    key_index = 0
+    for byte in plain_bytes:
+        cipher_byte = (byte + key_bytes[key_index]) % 256
+        cipher_bytes.append(cipher_byte)
+        key_index = (key_index + 1) % len(key_bytes)
+    return cipher_bytes
+
+def extended_vigenere_decrypt(cipher_bytes, key):
+    plain_bytes = bytearray()
+    key_bytes = key.encode()
+    key_index = 0
+    for byte in cipher_bytes:
+        plain_byte = (byte - key_bytes[key_index] + 256) % 256
+        plain_bytes.append(plain_byte)
+        key_index = (key_index + 1) % len(key_bytes)
+    return plain_bytes
+
+# Fungsi untuk enkripsi dan dekripsi Playfair Cipher
+def playfair_encrypt(plain_text, key):
+    # Buat matriks Playfair 5x5 dan implementasi
+    pass
+
+def playfair_decrypt(cipher_text, key):
+    # Implementasi dekripsi Playfair Cipher
+    pass
+
+# Fungsi untuk enkripsi dan dekripsi Enigma Cipher (3-rotor)
+def enigma_encrypt(plain_text, key):
+    # Implementasi Enigma Cipher dengan 3-rotor
+    pass
+
+def enigma_decrypt(cipher_text, key):
+    # Implementasi Enigma Cipher dengan 3-rotor
+    pass
+
+# Fungsi untuk enkripsi dan dekripsi One-Time Pad Cipher
+def otp_encrypt(plain_text, key):
+    cipher_text = ""
+    for i, char in enumerate(plain_text):
+        if char.isalpha():
+            shift = ord(key[i]) - ord('A')
+            cipher_char = chr((ord(char.upper()) - ord('A') + shift) % 26 + ord('A'))
+            cipher_text += cipher_char
+    return cipher_text
+
+def otp_decrypt(cipher_text, key):
+    plain_text = ""
+    for i, char in enumerate(cipher_text):
+        if char.isalpha():
+            shift = ord(key[i]) - ord('A')
+            plain_char = chr((ord(char) - ord('A') - shift + 26) % 26 + ord('A'))
+            plain_text += plain_char
+    return plain_text
+
+# Fungsi untuk memuat file
+def load_file():
+    file_path = filedialog.askopenfilename()
+    with open(file_path, "rb") as file:
+        content = file.read()
+    return content
+
+# Fungsi untuk menyimpan hasil enkripsi
+def save_file(content):
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt")
+    with open(file_path, "wb") as file:
+        file.write(content)
+
+# Antarmuka pengguna
+class CipherApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Cipher Encryption & Decryption Tool")
+
+        self.message_label = tk.Label(root, text="Message:")
+        self.message_label.pack()
+        
+        self.message_entry = tk.Text(root, height=10, width=50)
+        self.message_entry.pack()
+
+        self.key_label = tk.Label(root, text="Key:")
+        self.key_label.pack()
+        
+        self.key_entry = tk.Entry(root, width=50)
+        self.key_entry.pack()
+
+        self.cipher_var = tk.StringVar(root)
+        self.cipher_var.set("Vigenere Standard")
+
+        self.cipher_menu = tk.OptionMenu(root, self.cipher_var, 
+                                         "Vigenere Standard", 
+                                         "Extended Vigenere", 
+                                         "Playfair", 
+                                         "Enigma", 
+                                         "One-Time Pad")
+        self.cipher_menu.pack()
+
+        self.encrypt_button = tk.Button(root, text="Encrypt", command=self.encrypt)
+        self.encrypt_button.pack()
+
+        self.decrypt_button = tk.Button(root, text="Decrypt", command=self.decrypt)
+        self.decrypt_button.pack()
+
+        self.output_label = tk.Label(root, text="Output:")
+        self.output_label.pack()
+        
+        self.output_text = tk.Text(root, height=10, width=50)
+        self.output_text.pack()
+
+    def encrypt(self):
+        message = self.message_entry.get("1.0", tk.END).strip()
+        key = self.key_entry.get().strip()
+        cipher_type = self.cipher_var.get()
+
+        if cipher_type == "Vigenere Standard":
+            result = vigenere_encrypt(message, key)
+        elif cipher_type == "Extended Vigenere":
+            result = extended_vigenere_encrypt(message.encode(), key).decode()
+        elif cipher_type == "Playfair":
+            result = playfair_encrypt(message, key)
+        elif cipher_type == "Enigma":
+            result = enigma_encrypt(message, key)
+        elif cipher_type == "One-Time Pad":
+            result = otp_encrypt(message, key)
+
+        self.output_text.delete("1.0", tk.END)
+        self.output_text.insert(tk.END, result)
+
+    def decrypt(self):
+        message = self.message_entry.get("1.0", tk.END).strip()
+        key = self.key_entry.get().strip()
+        cipher_type = self.cipher_var.get()
+
+        if cipher_type == "Vigenere Standard":
+            result = vigenere_decrypt(message, key)
+        elif cipher_type == "Extended Vigenere":
+            result = extended_vigenere_decrypt(message.encode(), key).decode()
+        elif cipher_type == "Playfair":
+            result = playfair_decrypt(message, key)
+        elif cipher_type == "Enigma":
+            result = enigma_decrypt(message, key)
+        elif cipher_type == "One-Time Pad":
+            result = otp_decrypt(message, key)
+
+        self.output_text.delete("1.0", tk.END)
+        self.output_text.insert(tk.END, result)
+
+# Main program
+root = tk.Tk()
+app = CipherApp(root)
+root.mainloop()
